@@ -1,0 +1,19 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // FAQAT SHU QATORDAGI EMAILNI O'ZINGIZNING ADMIN EMAILINGIZGA ALMASHTIRING
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'inoyatxon552@gmail.com';
+    }
+    match /classes/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /blocks/{id}  { allow read: if true; allow write: if isAdmin(); }
+    match /tests/{id}   { allow read: if true; allow write: if isAdmin(); }
+    match /results/{id} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create: if request.resource.data.keys().hasOnly(['c','q','b','s','n','sc','tot','det','t'])
+                    && request.resource.data.n is string && request.resource.data.sc is number;
+      allow update, delete: if isAdmin();
+    }
+  }
+}
